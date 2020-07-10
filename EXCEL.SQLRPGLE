@@ -80,7 +80,7 @@ dcl-proc Excel_createWorkbook export;
     fputs('<ss:Style ss:ID="H1">' : assignedFile);
     fputs('<ss:Font ss:FontName="Calibri" ' : assignedFile);
     fputs('ss:Size="14" ss:Color="#222222"/>' : assignedFile);
-    fputs('<ss:Interior ss:Color="#CCFFCC" ss:Pattern="Solid"/>' : assignedFile);
+    fputs('<ss:Interior ss:Color="#CCCCCC" ss:Pattern="Solid"/>' : assignedFile);
     fputs('</ss:Style>' : assignedFile);
 
     // Detail 1 Style
