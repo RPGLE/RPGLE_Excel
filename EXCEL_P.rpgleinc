@@ -1,0 +1,207 @@
+**FREE
+/if defined(EXCEL_P)
+/eof
+/endif
+
+/define EXCEL_P
+//--------------------------------------------------------------------------------------------------
+// MIT License
+// Copyright (c) 2020 Ghost +
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//--------------------------------------------------------------------------------------------------
+// EXCEL : Excel Spreadsheet procedures
+//        This service program contains procedures related to creating spreadsheets.
+//--------------------------------------------------------------------------------------------------
+// Developer Date       Modification Description
+// Ghost+    2020/07/10 Initial Coding
+//--------------------------------------------------------------------------------------------------
+
+// Supported Excel Cell Type Constants
+dcl-c EXCEL_CELL_TYPE_STRING const('S');
+dcl-c EXCEL_CELL_TYPE_NUMBER const('N');
+
+// Style Constants
+// Header Constants - Used commonly for Column Headers
+//      EXCEL_STYLE_HEADER_DEFAULT         = Calibri, 14pt, black text on light grey background
+//      EXCEL_STYLE_HEADER_RIGHT_JUSTIFIED = Calibri, 14pt, black text on light grey background,
+//                                           right justified
+// Detail Constants - Used for detail cells, commonly for strings
+//      EXCEL_STYLE_DETAIL_DEFAULT         = calibri, 12pt, black
+//      EXCEL_STYLE_DETAIL_RIGHT_JUSTIFIED = calibri, 12pt, black, right justified
+// Money Constants - Used for detail cells, commonly for money.
+//      EXCEL_STYLE_MONEY_DEFAULT                  = calibri, 14pt, 2decimals, black
+//      EXCEL_STYLE_MONEY_GREEN_BACKGROUND         = calibri, 14pt, 2decimals, black, green
+//                                                   background
+//      EXCEL_STYLE_MONEY_LIGHT_YELLOW_BACKGROUND  = calibri, 14pt, 2decimals, black, light yellow
+//                                                   background
+//      EXCEL_STYLE_MONEY_BRIGHT_YELLOW_BACKGROUND = calibri, 14pt, 2decimals, black, bright yellow
+//                                                   background
+//      EXCEL_STYLE_MONEY_ORANGE_BACKGROUND        = calibri, 14pt, 2decimals, black, orange
+//                                                   background
+//      EXCEL_STYLE_MONEY_RED_BACKGROUND           = calibri, 14pt, 2decimals, black, red background
+dcl-c EXCEL_STYLE_HEADER_DEFAULT const('H1');
+//dcl-c EXCEL_STYLE_HEADER_RIGHT_JUSTIFIED const('H2');
+dcl-c EXCEL_STYLE_DETAIL_DEFAULT const('D1');
+//dcl-c EXCEL_STYLE_DETAIL_RIGHT_JUSTIFIED const('D2');
+//dcl-c EXCEL_STYLE_MONEY_DEFAULT const('M1');
+//dcl-c EXCEL_STYLE_MONEY_GREEN_BACKGROUND const('M2');
+//dcl-c EXCEL_STYLE_MONEY_LIGHT_YELLOW_BACKGROUND const('M3');
+//dcl-c EXCEL_STYLE_MONEY_BRIGHT_YELLOW_BACKGROUND const('M4');
+//dcl-c EXCEL_STYLE_MONEY_ORANGE_BACKGROUND const('M5');
+//dcl-c EXCEL_STYLE_MONEY_RED_BACKGROUND const('M6');
+
+dcl-ds dt_columnsData qualified template inz;
+  count int(10:0) inz;
+  widths zoned(3:0) dim(100) inz;
+end-ds;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_createWorkbook
+// Purpose    : Creates a new file in the IFS for generating a formatted Excel Workbook.
+// Returns    : success => Defaults to off, will fail if no workbook exists.
+// Parameter/s: workbookName => Constant reference to the name of the file/workbook.
+//--------------------------------------------------------------------------------------------------
+dcl-pr Excel_createWorkbook ind;
+  workbookName char(45) const;
+end-pr;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_closeWorkbook
+// Purpose    : Closes off the Workbook so it is ready for use.
+// Returns    : success => Defaults to off, will fail if no workbook exists.
+// Parameter/s: workbookName => Constant reference to the name of the file/workbook.
+//--------------------------------------------------------------------------------------------------
+dcl-pr Excel_closeWorkbook ind;
+  workbookName char(45) const;
+end-pr;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_createWorksheet
+// Purpose    : Creates a new worksheet, with the name provided. Workbook must exist before creating
+//              a new worksheet. The closeWorksheet procedure must be called to close off the
+//              worksheet when all processing is completed.
+// Returns    : success => Defaults to off, will fail if no workbook exists.
+// Parameter/s: workbookName => Constant reference to the name of the file/workbook.
+//            : worksheetName => Constant reference to the name of the worksheet
+//--------------------------------------------------------------------------------------------------
+dcl-pr Excel_createWorksheet ind;
+  workbookName char(45) const;
+  worksheetName char(30) const;
+end-pr;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_closeWorksheet
+// Purpose    : Closes off a worksheet to complete off all data that has been added. Workbook and
+//              worksheet must exist before closing the worksheet. This procedure must be called
+//              before attempting to close a workbook or adding new worksheets.
+//                Eventually support will be added to allow multiple worksheets to be worked with
+//                at once, but currently, the worksheet name is not used and this will just close
+//                the most recently opened worksheet.
+// Returns    : success => Defaults to off, will fail if no workbook exists.
+// Parameter/s: workbookName => Constant reference to the name of the file/workbook.
+//            : worksheetName => Constant reference to the name of the worksheet (Not yet used...)
+//--------------------------------------------------------------------------------------------------
+dcl-pr Excel_closeWorksheet ind;
+  workbookName char(45) const;
+  worksheetName char(30) const;
+end-pr;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_createRow
+// Purpose    : Opens a new row within the workbook in the most recently opened worksheet. (Support
+//              to be added later to allow updates to previously opened worksheets). Workbook and
+//              worksheet must exist before attempting to create a row.
+//              Use this to create a row before adding cells with data. Once finished with the
+//              row, use closeRow to end.
+// Returns    : success => Defaults to off, will fail if no workbook exists.
+// Parameter/s: workbookName => Constant reference to the name of the file/workbook.
+//            : worksheetName => constant reference to the name of the worksheet (Not yet used...)
+//--------------------------------------------------------------------------------------------------
+dcl-pr Excel_createRow ind;
+  workbookName char(45) const;
+  worksheetName char(30) const;
+end-pr;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_closeRow
+// Purpose    : Closes a new row within the workbook in the most recently opened worksheet. (Support
+//              to be added later to allow updates to previously opened worksheets). Workbook,
+//              worksheet and row must exist before attempting to create a row.
+//              Use this to close a row after it has been created and when the cells have been
+//              filled.
+// Returns    : success => default to off, will be set on if processing able to execute.
+// Parameter/s: workbookName => Name of the workbook to work with.
+//              worksheetName => Not used currently - will allow multiple worksheets to be worked on
+//--------------------------------------------------------------------------------------------------
+dcl-pr Excel_closeRow ind;
+  workbookName char(45) const;
+  worksheetName char(30) const;
+end-pr;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_writeCell
+// Purpose    : This procedure is used to write a single cell into an existing row. The workbook,
+//              worksheet and a row must exist to add this to.
+// Returns    : success => default to off, will be set on if processing able to execute.
+// Parameter/s: workbookName => Name of the workbook to work with.
+//              worksheetName => Not used currently - will allow multiple worksheets to be worked on
+//              cellData contains the actual detail to add to the cell.
+//              cellType (use the defined constants) to advise excel what the data type is, being
+//                       either a string or a numeric.
+//              cellStyle => The constant for the style to apply to the cell.
+//              mergeAcross => Optional parm if the cell should merge with multiple cells.
+//--------------------------------------------------------------------------------------------------
+dcl-pr Excel_writeCell ind;
+  workbookName char(45) const;
+  worksheetName char(30) const;
+  cellData char(200) const;
+  cellType char(1) const;
+  cellStyle char(2) const;
+  mergeAcross zoned(3:0) const options(*nopass);
+end-pr;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_setColumnWidths
+// Purpose    : Set the width for the columns within a worksheet. The workbook and worksheet must
+//              already exist and not be closed. The count must be provided for the number of
+//              columns we will be setting the width for.
+//                Note: Excel will only autofitwidth for Numeric and Date Cells.
+// Returns    : success => default to off, will be set on if processing able to execute.
+// Parameter/s: workbookName => Name of the workbook to work with.
+//              worksheetName => Not used currently - will allow multiple worksheets to be worked on
+//              columnsData => Data structure containing the count of the columns we will be
+//                             updating as well as the values themselves, within the array.
+//--------------------------------------------------------------------------------------------------
+dcl-pr Excel_setColumnWidths ind;
+  workbookName char(45) const;
+  worksheetName char(30) const;
+  columnsData likeDS(dt_columnsData) const;
+end-pr;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_deleteWorkbook
+// Purpose    : Removes the workbook from the IFS.
+// Returns    : success => default to off, will be set on if processing able to execute.
+// Parameter/s: workbookName => Name of the workbook to delete.
+//--------------------------------------------------------------------------------------------------
+dcl-pr Excel_deleteWorkbook ind;
+  workbookName char(45) const;
+end-pr;
+ 
