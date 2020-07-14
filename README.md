@@ -1,5 +1,5 @@
 # RPGLE_Excel
-Service program to generate Excel spreadsheets with xml through a simple Service Program.
+Service program to generate Excel spreadsheets (using xml).
 
 <h2>Terminology</h2>
 <ul>
