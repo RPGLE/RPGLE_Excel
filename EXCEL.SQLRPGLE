@@ -317,7 +317,38 @@ dcl-proc Excel_writeCell export;
   fileName = %trim(workbookName) + '.xml';
   assignedFile = fopen(%trim(fileName) : 'a+');
   if assignedFile <> *null;
+    success = writeCell(assignedFile : cellData : cellType : cellStyle : mergeAcrossCells);
+    // Close the file as we are done.
+    fclose(assignedFile);
+  endif;
 
+  return success;
+end-proc;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : writeCell
+// Purpose    : Local proc for the actual write of the cells.
+// Returns    : success => default to off, will be set on if processing able to execute.
+// Parameter/s: workbookName => Name of the workbook to add the row to.
+//              worksheetName => Not used currently - will allow multiple worksheets to be worked on
+//              cellData => contains the actual detail to add to the cell.
+//              cellType => (use the defined constants) to advise excel what the data type is, being
+//                          either a string or a numeric.
+//              cellStyle => The constant for the style to apply to the cell.
+//              mergeAcrossCells => blank if no merge required
+//--------------------------------------------------------------------------------------------------
+dcl-proc writeCell;
+  dcl-pi *n ind;
+    assignedFile like(pFile) const;
+    cellData char(200) const;
+    cellType char(1) const;
+    cellStyle char(2) const;
+    mergeAcrossCells char(3) const;
+  end-pi;
+
+  dcl-s success ind inz(*off);
+
+  if assignedFile <> *null;
     // If the cell was requested to be merged, then we'll use a different cell definition with
     // the number of columns we'll be merging, as well as the style.
     if mergeAcrossCells <> *blanks;
@@ -338,9 +369,6 @@ dcl-proc Excel_writeCell export;
 
     // Close the cell off.
     fputs('</ss:Cell>' : assignedFile);
-
-    // Close the file as we are done.
-    fclose(assignedFile);
     success = *on;
   endif;
 
@@ -396,7 +424,7 @@ end-proc;
 
 //--------------------------------------------------------------------------------------------------
 // Procedure  : Excel_deleteWorkbook
-// Purpose    : Removes the workbook from the IFS. NOT YET READY*****************
+// Purpose    : Removes the workbook from the IFS.
 // Returns    : success => default to off, will be set on if processing able to execute.
 // Parameter/s: workbookName => Name of the workbook to delete.
 //--------------------------------------------------------------------------------------------------
@@ -407,6 +435,56 @@ dcl-proc Excel_deleteWorkbook export;
 
   dcl-s success ind inz(*off);
 
+
+  return success;
+end-proc;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_writeSimpleRow
+// Purpose    : Writes a row with the cells added to it using simple processing.
+// Returns    : success => default to off, will be set on if processing able to execute.
+// Parameter/s: workbookName => Name of the workbook to add to.
+//            : worksheetName => Name of the worksheet to add to.
+//            : simpleRow => DS containing a DS array with the cell data to add to a row.
+//--------------------------------------------------------------------------------------------------
+dcl-proc Excel_writeSimpleRow export;
+  dcl-pi *n ind;
+    workbookName char(45) const;
+    worksheetName char(30) const;
+    simpleRow likeDS(dt_simpleRow) const;
+  end-pi;
+
+  dcl-s success ind inz(*off);
+  dcl-s fileName char(50) inz;
+  dcl-s assignedFile like(pFILE) inz;
+  dcl-s mergeAcrossCells char(3) inz;
+  dcl-s i int(10:0) inz;
+
+  // Open the existing file...
+  fileName = %trim(workbookName) + '.xml';
+  assignedFile = fopen(%trim(fileName) : 'a+');
+  if assignedFile <> *null;
+    // We don't support merge here, so we'll just set to blank and send it to the local proc.
+    mergeAcrossCells = *blanks;
+    fputs('<ss:Row>' : assignedFile);
+
+    // Loop over each DS array and add it as a cell to the row. If for any reason it fails, then
+    // we will exit and report the error.
+    for i = 1 to simpleRow.count;
+      success = writeCell(assignedFile
+                        : simpleRow.cells(i).cellData
+                        : simpleRow.cells(i).cellType
+                        : simpleRow.cells(i).cellStyle
+                        : mergeAcrossCells);
+      if not success;
+        leave;
+      endif;
+    endfor;
+
+    // Close the row. Then close the file as we are done.
+    fputs('</ss:Row>' : assignedFile);
+    fclose(assignedFile);
+  endif;
 
   return success;
 end-proc; 
