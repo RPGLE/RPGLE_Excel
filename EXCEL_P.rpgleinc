@@ -205,3 +205,16 @@ dcl-pr Excel_deleteWorkbook ind;
   workbookName char(45) const;
 end-pr;
  
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_writeSimpleRow
+// Purpose    : Writes a row with the cells added to it using simple processing.
+// Returns    : success => default to off, will be set on if processing able to execute.
+// Parameter/s: workbookName => Name of the workbook to add to.
+//            : worksheetName => Name of the worksheet to add to.
+//            : simpleRow => DS containing a DS array with the cell data to add to a row.
+//--------------------------------------------------------------------------------------------------
+dcl-pr Excel_writeSimpleRow ind;
+  workbookName char(45) const;
+  worksheetName char(30) const;
+  simpleRow likeDS(dt_simpleRow) const;
+end-pr;    
