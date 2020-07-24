@@ -69,9 +69,12 @@ dcl-proc Excel_createWorkbook export;
   if assignedFile <> *null;
 
     // Write xml header
-    fputs('<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?>' : assignedFile);
-    fputs('<ss:Workbook ' : assignedFile);
-    fputs('xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' : assignedFile);
+    fputs('<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?>'
+        : assignedFile);
+    fputs('<ss:Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' : assignedFile);
+    fputs('xmlns:x="urn:schemas-microsoft-com:office:excel" ' : assignedFile);
+    fputs('xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" ' : assignedFile);
+    fputs('xmlns:html="https://www.w3.org/TR/html401/">' : assignedFile);
 
     // Default Styles - can be customized or more styles added later...
     fputs('<ss:Styles>' : assignedFile);
@@ -79,14 +82,36 @@ dcl-proc Excel_createWorkbook export;
     // Header 1 Style
     fputs('<ss:Style ss:ID="H1">' : assignedFile);
     fputs('<ss:Font ss:FontName="Calibri" ' : assignedFile);
-    fputs('ss:Size="14" ss:Color="#222222"/>' : assignedFile);
+    fputs('ss:Size="14" ss:Color="#222222" ss:Bold="1"/>' : assignedFile);
     fputs('<ss:Interior ss:Color="#CCCCCC" ss:Pattern="Solid"/>' : assignedFile);
+    fputs('</ss:Style>' : assignedFile);
+
+    // Header 2 Style
+    fputs('<ss:Style ss:ID="H2">' : assignedFile);
+    fputs('<ss:Font ss:FontName="Calibri" ' : assignedFile);
+    fputs('ss:Size="14" ss:Color="#222222" ss:Bold="1" />' : assignedFile);
+    fputs('<ss:Interior ss:Color="#CCCCCC" ss:Pattern="Solid"/>' : assignedFile);
+    fputs('<ss:Alignment ss:Horizontal="Center" ss:Vertical="Bottom"/>' : assignedFile);
     fputs('</ss:Style>' : assignedFile);
 
     // Detail 1 Style
     fputs('<ss:Style ss:ID="D1">' : assignedFile);
     fputs('<ss:Font ss:FontName="Calibri" ' : assignedFile);
     fputs('ss:Size="12" ss:Color="#000000"/>' : assignedFile);
+    fputs('</ss:Style>' : assignedFile);
+
+    // Detail 2 Style
+    fputs('<ss:Style ss:ID="D2">' : assignedFile);
+    fputs('<ss:Font ss:FontName="Calibri" ' : assignedFile);
+    fputs('ss:Size="12" ss:Color="#000000"/>' : assignedFile);
+    fputs('<ss:Alignment ss:Horizontal="Center" ss:Vertical="Bottom"/>' : assignedFile);
+    fputs('</ss:Style>' : assignedFile);
+
+    // Money 1 Style
+    fputs('<ss:Style ss:ID="M1">' : assignedFile);
+    fputs('<ss:Font ss:FontName="Calibri" ' : assignedFile);
+    fputs('ss:Size="12" ss:Color="#000000"/>' : assignedFile);
+    fputs('<ss:NumberFormat ss:Format="Currency"/>' : assignedFile);
     fputs('</ss:Style>' : assignedFile);
 
     // Close Styles XML
@@ -487,4 +512,4 @@ dcl-proc Excel_writeSimpleRow export;
   endif;
 
   return success;
-end-proc; 
+end-proc;
