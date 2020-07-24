@@ -39,37 +39,34 @@ dcl-c EXCEL_CELL_TYPE_NUMBER const('N');
 
 // Style Constants
 // Header Constants - Used commonly for Column Headers
-//      EXCEL_STYLE_HEADER_DEFAULT         = Calibri, 14pt, black text on light grey background
-//      EXCEL_STYLE_HEADER_RIGHT_JUSTIFIED = Calibri, 14pt, black text on light grey background,
-//                                           right justified
+//      EXCEL_STYLE_HEADER_DEFAULT  = Calibri, 14pt, black text on light grey background, bold
+//      EXCEL_STYLE_HEADER_CENTERED = Calibri, 14pt, black text on light grey background, bold, 
+//                                    center alignment
 // Detail Constants - Used for detail cells, commonly for strings
-//      EXCEL_STYLE_DETAIL_DEFAULT         = calibri, 12pt, black
-//      EXCEL_STYLE_DETAIL_RIGHT_JUSTIFIED = calibri, 12pt, black, right justified
+//      EXCEL_STYLE_DETAIL_DEFAULT  = calibri, 12pt, black
+//      EXCEL_STYLE_DETAIL_CENTERED = calibri, 12pt, black, center alignment
 // Money Constants - Used for detail cells, commonly for money.
 //      EXCEL_STYLE_MONEY_DEFAULT                  = calibri, 14pt, 2decimals, black
-//      EXCEL_STYLE_MONEY_GREEN_BACKGROUND         = calibri, 14pt, 2decimals, black, green
-//                                                   background
-//      EXCEL_STYLE_MONEY_LIGHT_YELLOW_BACKGROUND  = calibri, 14pt, 2decimals, black, light yellow
-//                                                   background
-//      EXCEL_STYLE_MONEY_BRIGHT_YELLOW_BACKGROUND = calibri, 14pt, 2decimals, black, bright yellow
-//                                                   background
-//      EXCEL_STYLE_MONEY_ORANGE_BACKGROUND        = calibri, 14pt, 2decimals, black, orange
-//                                                   background
-//      EXCEL_STYLE_MONEY_RED_BACKGROUND           = calibri, 14pt, 2decimals, black, red background
 dcl-c EXCEL_STYLE_HEADER_DEFAULT const('H1');
-//dcl-c EXCEL_STYLE_HEADER_RIGHT_JUSTIFIED const('H2');
+dcl-c EXCEL_STYLE_HEADER_CENTERED const('H2');
 dcl-c EXCEL_STYLE_DETAIL_DEFAULT const('D1');
-//dcl-c EXCEL_STYLE_DETAIL_RIGHT_JUSTIFIED const('D2');
-//dcl-c EXCEL_STYLE_MONEY_DEFAULT const('M1');
-//dcl-c EXCEL_STYLE_MONEY_GREEN_BACKGROUND const('M2');
-//dcl-c EXCEL_STYLE_MONEY_LIGHT_YELLOW_BACKGROUND const('M3');
-//dcl-c EXCEL_STYLE_MONEY_BRIGHT_YELLOW_BACKGROUND const('M4');
-//dcl-c EXCEL_STYLE_MONEY_ORANGE_BACKGROUND const('M5');
-//dcl-c EXCEL_STYLE_MONEY_RED_BACKGROUND const('M6');
+dcl-c EXCEL_STYLE_DETAIL_CENTERED const('D2');
+dcl-c EXCEL_STYLE_MONEY_DEFAULT const('M1');
 
 dcl-ds dt_columnsData qualified template inz;
   count int(10:0) inz;
   widths zoned(3:0) dim(100) inz;
+end-ds;
+
+dcl-ds dt_simpleRow qualified template inz;
+  count int(10:0) inz;
+  cells likeDS(dt_simpleRowCell) dim(99) inz;
+end-ds;
+
+dcl-ds dt_simpleRowCell qualified template inz;
+  cellData char(200);
+  cellType char(1);
+  cellStyle char(2);
 end-ds;
 
 //--------------------------------------------------------------------------------------------------
@@ -204,7 +201,7 @@ end-pr;
 dcl-pr Excel_deleteWorkbook ind;
   workbookName char(45) const;
 end-pr;
- 
+
 //--------------------------------------------------------------------------------------------------
 // Procedure  : Excel_writeSimpleRow
 // Purpose    : Writes a row with the cells added to it using simple processing.
@@ -217,4 +214,4 @@ dcl-pr Excel_writeSimpleRow ind;
   workbookName char(45) const;
   worksheetName char(30) const;
   simpleRow likeDS(dt_simpleRow) const;
-end-pr;    
+end-pr;
