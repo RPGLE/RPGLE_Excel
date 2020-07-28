@@ -8,4 +8,5 @@
                 EXPORT     SYMBOL("EXCEL_WRITECELL")
                 EXPORT     SYMBOL("EXCEL_SETCOLUMNWIDTHS")
                 EXPORT     SYMBOL("EXCEL_DELETEWORKBOOK")
+                EXPORT     SYMBOL("EXCEL_WRITESIMPLEROW")
              ENDPGMEXP      
