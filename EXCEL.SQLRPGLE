@@ -513,3 +513,75 @@ dcl-proc Excel_writeSimpleRow export;
 
   return success;
 end-proc;
+
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_email
+// Purpose    : Emails the workbook to the specified email. The workbook will be attached to the
+//              email.
+//              We have support for up to 20 recipients - including BCC and CC types. Please be sure
+//              that the number of recipients is correctly updated in email.recipientCount.
+//              Uses SNDSMTPEMM to send. IBM documentation as follows:
+//                 https://www.ibm.com/support/pages/sndsmtpemm-command-instructions
+//              The user requesting must be in the Distribution directory otherwise they will be
+//              temporarily granted authority of user profile JASMINE.
+//              Please note: This does NOT delete the file from the IFS after sending.
+// Returns    : success => default to off, will be set on if processing able to execute.
+// Parameter/s: workbookName => Name of the workbook to add to.
+//            : email => Contains all information for sending.
+//--------------------------------------------------------------------------------------------------
+dcl-proc Excel_email export;
+  dcl-pi *n ind;
+    workbookName char(45) const;
+    email likeDS(dt_excelEmail) const;
+  end-pi;
+
+  dcl-pr EXECUTE extpgm('QCMDEXC');
+    commandString char(10000) const;
+    commandLength packed(15:5) const;
+  end-pr;
+
+  dcl-s success ind inz(*off);
+  dcl-s fileName char(50) inz;
+  dcl-s i int(10:0) inz;
+  dcl-s recipientString char(2000) inz;
+  dcl-s command char(10000) inz;
+  dcl-s command2 char(1000) inz;
+  dcl-s user char(10) inz;
+
+  // Complete the file name and prepare our command. The workbook name will contain the path.
+  fileName = %trim(workbookName) + '.xml';
+
+  // Don't even try to send this unless we have at LEAST one recipient.
+  if email.recipientCount > *zero;
+    // Build the recipient string as RCP((X@Y.COM) (Y@Y.COM *BCC) (etc...))
+    recipientString = 'RCP(';
+    for i = 1 to email.recipientCount;
+      recipientString = %trim(recipientString) + '(' + %trim(email.emailRecipient(i).emailAddress);
+      if email.emailRecipient(i).type <> EXCEL_RECIPIENT_TYPE_PRIMARY
+         and email.emailRecipient(i).type <> *blanks;
+        recipientString = %trim(recipientString) + ' ' + %trim(email.emailRecipient(i).type);
+      endif;
+      recipientString = %trim(recipientString) + ')';
+    endfor;
+    recipientString = %trim(recipientString) + ')';
+
+    command = 'SNDSMTPEMM ' + %trim(recipientString)
+            + ' SUBJECT(''' + %trim(email.subject)
+            + ''') NOTE(''' + %trim(email.content)
+            + ''') ATTACH(('''
+            + %trim(fileName)
+            + ''' *XML *TXT)) CONTENT(';
+    if email.contentType = *blanks;
+      command = %trim(command) + ' ' + %trim(email.contentType) + ')';
+    else;
+      command = %trim(command) + ' ' + %trim(EXCEL_CONTENT_TYPE_PLAIN) + ')';
+    endif;
+    
+    // Send the email...
+    EXECUTE(%trim(command) : %len(%trim(command)));
+    success = *on;
+  endif;
+
+  return success;
+end-proc; 
