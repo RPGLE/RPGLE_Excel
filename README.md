@@ -1,5 +1,5 @@
 # RPGLE_Excel
-Service program to generate Excel spreadsheets (using xml).
+Service program to generate Excel spreadsheets (using xml/SpreadsheetML) with support for a basic email send with the attachment from IFS.
 
 <h2>Terminology</h2>
 <ul>
