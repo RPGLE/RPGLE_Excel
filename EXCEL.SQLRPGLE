@@ -521,10 +521,8 @@ end-proc;
 //              email.
 //              We have support for up to 20 recipients - including BCC and CC types. Please be sure
 //              that the number of recipients is correctly updated in email.recipientCount.
-//              Uses SNDSMTPEMM to send. IBM documentation as follows:
+//              Uses SNDSMTPEMM to send email. IBM documentation as follows:
 //                 https://www.ibm.com/support/pages/sndsmtpemm-command-instructions
-//              The user requesting must be in the Distribution directory otherwise they will be
-//              temporarily granted authority of user profile JASMINE.
 //              Please note: This does NOT delete the file from the IFS after sending.
 // Returns    : success => default to off, will be set on if processing able to execute.
 // Parameter/s: workbookName => Name of the workbook to add to.
