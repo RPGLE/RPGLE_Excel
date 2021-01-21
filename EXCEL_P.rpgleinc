@@ -33,25 +33,58 @@
 // Ghost+    2020/07/10 Initial Coding
 //--------------------------------------------------------------------------------------------------
 
+**FREE
+/if defined(EXCEL_P)
+/eof
+/endif
+
+/define EXCEL_P
+
 // Supported Excel Cell Type Constants
 dcl-c EXCEL_CELL_TYPE_STRING const('S');
 dcl-c EXCEL_CELL_TYPE_NUMBER const('N');
 
+// Recipient Types for Emailing Excel Workbooks
+dcl-c EXCEL_RECIPIENT_TYPE_PRIMARY const('*PRI');
+dcl-c EXCEL_RECIPIENT_TYPE_CARBON_COPY const('*CC');
+dcl-c EXCEL_RECIPIENT_TYPE_BLIND_CARBON_COPY const('*BCC');
+
+// Content Types for Emailing Excel Workbooks
+// NOTE: The "Content" of the email is where the long text/body of the email goes. If formatting
+// the layout, generally HTML or XML is used, otherwise use PLAIN for plain text entry.
+dcl-c EXCEL_CONTENT_TYPE_PLAIN const('*PLAIN');
+dcl-c EXCEL_CONTENT_TYPE_XML const('*XML');
+dcl-c EXCEL_CONTENT_TYPE_HTML const('*HTML');
+
 // Style Constants
 // Header Constants - Used commonly for Column Headers
-//      EXCEL_STYLE_HEADER_DEFAULT  = Calibri, 14pt, black text on light grey background, bold
-//      EXCEL_STYLE_HEADER_CENTERED = Calibri, 14pt, black text on light grey background, bold, 
+//      EXCEL_STYLE_HEADER_DEFAULT  = Calibri, 14pt, black text on light grey background
+//      EXCEL_STYLE_HEADER_CENTERED = Calibri, 14pt, black text on light grey background,
 //                                    center alignment
 // Detail Constants - Used for detail cells, commonly for strings
 //      EXCEL_STYLE_DETAIL_DEFAULT  = calibri, 12pt, black
 //      EXCEL_STYLE_DETAIL_CENTERED = calibri, 12pt, black, center alignment
 // Money Constants - Used for detail cells, commonly for money.
 //      EXCEL_STYLE_MONEY_DEFAULT                  = calibri, 14pt, 2decimals, black
+//      EXCEL_STYLE_MONEY_GREEN_BACKGROUND         = calibri, 14pt, 2decimals, black, green
+//                                                   background
+//      EXCEL_STYLE_MONEY_LIGHT_YELLOW_BACKGROUND  = calibri, 14pt, 2decimals, black, light yellow
+//                                                   background
+//      EXCEL_STYLE_MONEY_BRIGHT_YELLOW_BACKGROUND = calibri, 14pt, 2decimals, black, bright yellow
+//                                                   background
+//      EXCEL_STYLE_MONEY_ORANGE_BACKGROUND        = calibri, 14pt, 2decimals, black, orange
+//                                                   background
+//      EXCEL_STYLE_MONEY_RED_BACKGROUND           = calibri, 14pt, 2decimals, black, red background
 dcl-c EXCEL_STYLE_HEADER_DEFAULT const('H1');
 dcl-c EXCEL_STYLE_HEADER_CENTERED const('H2');
 dcl-c EXCEL_STYLE_DETAIL_DEFAULT const('D1');
 dcl-c EXCEL_STYLE_DETAIL_CENTERED const('D2');
 dcl-c EXCEL_STYLE_MONEY_DEFAULT const('M1');
+//dcl-c EXCEL_STYLE_MONEY_GREEN_BACKGROUND const('M2');
+//dcl-c EXCEL_STYLE_MONEY_LIGHT_YELLOW_BACKGROUND const('M3');
+//dcl-c EXCEL_STYLE_MONEY_BRIGHT_YELLOW_BACKGROUND const('M4');
+//dcl-c EXCEL_STYLE_MONEY_ORANGE_BACKGROUND const('M5');
+//dcl-c EXCEL_STYLE_MONEY_RED_BACKGROUND const('M6');
 
 dcl-ds dt_columnsData qualified template inz;
   count int(10:0) inz;
@@ -67,6 +100,20 @@ dcl-ds dt_simpleRowCell qualified template inz;
   cellData char(200);
   cellType char(1);
   cellStyle char(2);
+end-ds;
+
+// The following two structures are used for the sending of an email with the excel attached.
+dcl-ds dt_excelEmail qualified template inz;
+  recipientCount int(10:0) inz;
+  emailRecipient likeDS(dt_excelEmailRecipient) dim(20) inz;
+  subject char(100) inz;
+  content char(4000) inz;
+  contentType char(6) inz;
+end-ds;
+
+dcl-ds dt_excelEmailRecipient qualified template inz;
+  emailAddress char(50) inz;
+  type char(4) inz;
 end-ds;
 
 //--------------------------------------------------------------------------------------------------
@@ -215,3 +262,21 @@ dcl-pr Excel_writeSimpleRow ind;
   worksheetName char(30) const;
   simpleRow likeDS(dt_simpleRow) const;
 end-pr;
+
+//--------------------------------------------------------------------------------------------------
+// Procedure  : Excel_email
+// Purpose    : Emails the workbook to the specified email using JASMINE user profile in a submitted
+//              job. The workbook will be attached to the email.
+//              We have support for up to 20 recipients - including BCC and CC types. Please be sure
+//              that the number of recipients is correctly updated in email.count.
+//              Uses SNDSMTPEMM to send email IBM documentation as follows:
+//                 https://www.ibm.com/support/pages/sndsmtpemm-command-instructions
+//              Please note: This does NOT delete the file from the IFS after sending.
+// Returns    : success => default to off, will be set on if processing able to execute.
+// Parameter/s: workbookName => Name of the workbook to add to.
+//            : email => Contains all information for sending.
+//--------------------------------------------------------------------------------------------------
+dcl-pr Excel_email ind;
+  workbookName char(45) const;
+  email likeDS(dt_excelEmail) const;
+end-pr; 
